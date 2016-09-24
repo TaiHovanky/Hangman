@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<script src = "//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<style>
+.container {
+  width: 100%;
+  background-color:#bdc3c7;
+  height: 100vh; /* setting height of container to 100% of the viewport height makes it take up whole window height */
+}
+
+#pageTitle {
+  text-align: center;
+}
+
+.blueText {
+  color: #34495e;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 70px;
+  color:#e74c3c;
+  text-shadow: 2px 2px #34495e;
+}
+
+h4 {
+  
+  font-size: 30px;
+  margin-top: 20px;
+}
+
+input {
+  margin-top: 20px; 
+  height: 50px;
+  border-radius: 7px;
+}
+
+button {
+  margin-top: 30px;
+  background-color: #2ecc71;
+  color: white;
+  border-style: none;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 5px;
+  height: 40px;
+  text-shadow: 1px 1px #34495e;
+}
+
+#letterDescription {
+  margin-top: 20px;
+  font-size: 30px;
+}
+
+#usedLetters {
+  font-size: 30px;
+  color: #c0392b;
+}
+
+#letterSpaces {
+  margin-top: 0px;
+  font-size: 50px;
+  text-align: center;
+}
+</style>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <div id="pageTitle" class="col-md-7 col-md-offset-3">
+     <h1>Hangman</h1>
+    <h4 class="blueText">Guess the letters in the randomly generated word by typing in the box below. Then click the "Submit Guess" button.</h4>
+    <input id="typer" class="col-md-2 col-md-offset-5">
+    </input>
+    
+    <button class=" col-md-4 col-md-offset-4" id="submit">   
+      Submit Guess</button>
+  <p id="letterDescription" class="col-md-6 col-md-offset-3 blueText">Letters that you've used:</p>
+    <div class="col-md-7 col-md-offset-2" id="usedLetters"></div> <!--end of usedLetters div !-->
+    </div> <!--end of correct div !-->
+    <div id="letterSpaces" class="col-md-5 col-md-offset-4 blueText">
+    </div> <!-- end of letterspaces div !-->
+  </div> <!--end of letters div !-->
+</div> <!--end of container div !-->
+
+<script type="text/javascript">
+$(document).ready(function(){
+  
+  var wordArr = ["alpha", "translate", "evidence", "anterior", "cephlapod", "velociraptor", "vindictive", "vertebrate", "supernova", "starship", "monster", "party", "tequila", "extraterrestrial", "monsoon"]; 
+  var randomWord;
+  var letterSpaceArr = [];
+  var usedLetters = [];  
+  var dInput = "";
+  var correctGuessesCount = 0;
+  var incorrectGuessesCount = 0;
+  var randomWordArr = [];
+  
+  function gameRestart(){
+    letterSpaceArr = [];
+    randomWord = wordArr[Math.floor(Math.random()*wordArr.length-1)]; //use Math.random() to select a randomWord. 
+    for(var i=0; i<randomWord.length; i++){
+      letterSpaceArr.push("_ ");
+    } //for the length of the word, there will be blank spaces rendered on the screen
+    usedLetters = []; //the usedLetters array gets emptied at the start of each game
+    $("#letterSpaces").html(letterSpaceArr);
+    $("#usedLetters").html("");
+    dInput = "";
+    correctGuessesCount = 0;
+    incorrectGuessesCount = 0;
+    randomWordArr = randomWord.split("");
+  } //everything is either turned into an empty string or set back to 0
+  
+  gameRestart();
+  
+  function letterMatch(word){
+    var isRight = false;
+    for(var j=0; j<randomWordArr.length; j++){
+      if(dInput === randomWordArr[j]){ //for every letter in randomWord, if the input letter is equal to a letter in randomWord, we set the letterSpaceArr[j] equal to that
+        letterSpaceArr[j] = randomWordArr[j];
+        $("#letterSpaces").html(letterSpaceArr);
+        correctGuessesCount += 1; //add one to the correct guesses
+        isRight = true; 
+      } 
+    }
+    if(isRight === false){
+      incorrectGuessesCount += 1; //used to track incorrect guesses. After a certain amount, the player loses
+    }
+    isRight = false; //set isRight back to false
+  }
+  
+  function usedYet(){
+    var alreadyUsed = false;
+    if(usedLetters.indexOf(dInput) > -1){
+        alreadyUsed = true;
+        dInput = "";
+    } //for the length of the usedLetters array, if the input letter is in the array, the input field is emptied and the alreadyUsed variable is set to True
+    
+    if(alreadyUsed){
+      alert("This letter has already been guessed. Enter another letter.");
+    }
+  }
+  
+  function winOrLose(right, wrong){
+    if(dInput === randomWord){ //if the input letters equal the randomword, you win
+      letterSpaceArr = [dInput]; //the letterSpaceArr gets set to the value of dInput. This lets you guess the right word
+      $("#letterSpaces").html(letterSpaceArr);
+      alert("You Win!");
+      gameRestart();
+    }
+    if(right === randomWord.length){ //if all of the guessed letters are correct, this block runs
+      letterSpaceArr = [randomWord];
+      $("#letterSpaces").html(letterSpaceArr);
+      alert("You Win!");
+      gameRestart();
+    }
+    if(wrong === 6){ //6 wrong guesses causes you to lose and for the game to restart
+      alert("You Lose!");
+      gameRestart();
+    }
+  }
+  
+  $('#typer').on("keyup", function() { 
+    dInput = this.value;
+  }); //when user types a letter into the typer input, it fills with the value of the key
+  
+  $("#submit").click(function(){
+    usedYet(); //check to see if that letter has been used 
+    usedLetters.push(dInput); //add dInput to the usedLetters array
+    $('#usedLetters').text(usedLetters);
+    letterMatch(randomWord); //see if the input letter is correct and fill spaces of array
+    winOrLose(correctGuessesCount, incorrectGuessesCount); //check for a win or loss
+    dInput = "";
+    $("#typer").val('');
+  });
+  
+}); //end of document ready function
+</script>
+</body>
+</html>
